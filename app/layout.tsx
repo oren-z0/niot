@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 
-import "styles/globals.css";
+import "../styles/globals.css";
 
 export const metadata: Metadata = {
   title: "Next JS SaaS Starter Template",
@@ -21,7 +21,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="bg-white dark:bg-black min-h-screen">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+        >
           {children}
         </ThemeProvider>
       </body>
