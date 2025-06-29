@@ -15,8 +15,7 @@ function hexToBase64(hex: string) {
     .replace(/=/g, '');
 }
 
-const Features = () => {
-
+const PayToZap = () => {
   const [nprofile, setNprofile] = useState("");
   const [parsedNprofile, setParsedNprofile] = useState<{ pubkey: string, relays: string[] } | undefined>(undefined);
   const [nprofileError, setNprofileError] = useState("");
@@ -240,4 +239,4 @@ const Features = () => {
   );
 };
 
-export default Features;
+export default PayToZap;

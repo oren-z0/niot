@@ -1,6 +1,6 @@
 import Header from "components/Header";
 import Hero from "components/Hero";
-import Features from "components/Features";
+import PayToZap from "components/PayToZap";
 import Section from "components/Section";
 import Footer from "components/Footer";
 import Customers from "components/Customers";
@@ -15,7 +15,7 @@ export default function Page() {
       <Header />
       <main>
         <Hero />
-        <Features />
+        <PayToZap />
         <Section
           leftHalf={
             <>
