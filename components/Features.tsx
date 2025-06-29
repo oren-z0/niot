@@ -1,9 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { nip19 } from "nostr-tools";
+import { bech32 } from "bech32";
 
 const maxSafePrice = 2 ** 43;
+
+function hexToBase64(hex: string) {
+  const pubkeyBytes = new Uint8Array(hex.match(/.{1,2}/g)?.map(byte => parseInt(byte, 16)) || []);
+  return btoa(String.fromCharCode(...pubkeyBytes))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+}
 
 const Features = () => {
 
@@ -13,6 +22,36 @@ const Features = () => {
   const [price, setPrice] = useState("");
   const [unit, setUnit] = useState("sats");
   const [zapMessage, setZapMessage] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const lnurlp = useMemo(() => {
+    if (!parsedNprofile) {
+      return undefined;
+    }
+    const targetUrl = new URL('https://niot.space/api/p');
+    targetUrl.searchParams.set('pk', hexToBase64(parsedNprofile.pubkey));
+    targetUrl.searchParams.set('r', JSON.stringify(parsedNprofile.relays));
+
+    const finalPrice = Number(price || '0');
+    if (finalPrice > 0 && !Number.isNaN(finalPrice)) {
+      targetUrl.searchParams.set('p', finalPrice.toString());
+      if (unit !== 'sats') {
+        targetUrl.searchParams.set('u', unit);
+      }
+    }
+    if (zapMessage) {
+      targetUrl.searchParams.set('m', zapMessage);
+    }
+    const words = bech32.toWords(new TextEncoder().encode(targetUrl.toString()));
+    return bech32.encode('lnurl', words, Number.MAX_SAFE_INTEGER).toUpperCase();
+  }, [parsedNprofile, price, unit, zapMessage]);
+
+  useEffect(() => {
+    if (copied) {
+      const timeout = setTimeout(() => setCopied(false), 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [copied]);
 
   function updateNprofile(e: React.ChangeEvent<HTMLInputElement>) {
     setNprofile(e.target.value);
@@ -130,6 +169,8 @@ const Features = () => {
                 id="unit"
                 name="unit"
                 className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
               >
                 <option value="sats">sats</option>
                 <option value="USD">dirty USD</option>
@@ -159,16 +200,35 @@ const Features = () => {
               Will be added to each zap event to allow separation between IoT triggers, up to 25 characters.
             </p>
           </div>
-
-          {/* Submit button */}
-          <div className="flex justify-center">
-            <button
-              type="submit"
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              Generate LNURL-Pay
-            </button>
-          </div>
+          {
+            lnurlp && (
+              <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  LNURL-Pay Endpoint
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="font-mono text-sm text-gray-800 dark:text-gray-200 break-all bg-white dark:bg-gray-800 p-3 rounded border border-gray-300 dark:border-gray-600 flex-1">
+                    {lnurlp}
+                  </div>
+                  <button
+                    type="button"
+                    disabled={copied}
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(lnurlp);
+                        setCopied(true);
+                      } catch (err) {
+                        console.error('Failed to copy text: ', err);
+                      }
+                    }}
+                    className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[80px]"
+                  >
+                    {copied ? 'Copied!' : 'Copy'}
+                  </button>
+                </div>
+              </div>
+            )
+          }
         </form>
         </div>
       </div>
