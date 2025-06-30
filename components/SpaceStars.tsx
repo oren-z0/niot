@@ -44,7 +44,7 @@ export default function SpaceStars() {
           >
             {
               isContainer && (
-                <div style={{ transform: `rotate(${Math.round(-90 + Math.random() * 180)}deg)` }}>
+                <div className="brightness-75" style={{ transform: `rotate(${Math.round(-90 + Math.random() * 180)}deg)` }}>
                   {
                     (index / 10 % 2) ? "🛸" : "🛰️"
                   }
