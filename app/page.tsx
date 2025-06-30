@@ -7,7 +7,7 @@ export default function Page() {
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-black">
       <Header />
-      <main className="mb-4 flex-grow-1">
+      <main className="mb-16 flex-grow-1">
         <Hero />
         <PayToZap />
       </main>
