@@ -125,7 +125,7 @@ const PayToZap = () => {
             Every Payment Becomes a <span className="italic">Zap</span>
           </h2>
           <p className="mt-8 text-xl text-gray-600 dark:text-gray-300 font-light">
-            Create LNURL-Pay links that create a <span className="italic">Zap</span> event when paid.
+            Create LNURL-Pay links that create <span className="italic">Zap</span> events when paid.
           </p>
         </div>
         <div className="mt-10">
