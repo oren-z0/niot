@@ -42,8 +42,8 @@ export async function GET(request: NextRequest) {
     if (relays.length === 0) {
       return NextResponse.json({ error: 'No relays provided' }, { status: 400 });
     }
-    const zapId = searchParams.get('i') || '';
-    if (zapId.length > 25 || !/^\d*$/.test(zapId)) {
+    const zapId = searchParams.get('i') || undefined;
+    if (zapId && (zapId.length > 25 || !/^\d*$/.test(zapId))) {
       return NextResponse.json({ error: 'Invalid zap message' }, { status: 400 });
     }
     let priceMillisats: number | undefined;
@@ -123,11 +123,13 @@ export async function GET(request: NextRequest) {
         // Malicious users can generate an LNURLP that uses the same zapId, but different price - then pay them
         // instead of the original LNURLP.
         ...(priceString && priceUnit && {
-          p: priceString,
+          p: priceString, // keep as string even though it's a number
           u: priceUnit,
         }),
       }),
-      i: zapId,
+      ...(zapId && {
+        i: zapId,
+      }),
       l: lnurlpUrl,
       r: relays,
       pk: publicKeyHex,
