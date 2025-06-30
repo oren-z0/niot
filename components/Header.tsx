@@ -12,19 +12,11 @@ export default function Header() {
           <ul className="flex space-x-2 mr-2">
             <li>
               <Link
-                href="/"
-                className="text-sm text-gray-800 dark:text-white px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              >
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link
                 href="https://njump.me/nprofile1qqsrx9hzmz8lj8ss38r4lmkumza2yfvtg4z45wc4dtmp04lv0x69legpz4mhxue69uhhyetvv9ujuerpd46hxtnfduhszrnhwden5te0dehhxtnvdakz7qgkwaehxw309ash2arg9ehx7um5wgcjucm0d5hsfa7mst"
                 target="_blank"
                 className="text-sm text-gray-800 dark:text-white px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
-                Follow Me
+                Follow on Nostr
               </Link>
             </li>
           </ul>
