@@ -30,8 +30,13 @@ const PayToZap = () => {
     }
     const targetUrl = new URL('https://niot.space/api/p');
     targetUrl.searchParams.set('pk', hexToBase64(parsedNprofile.pubkey));
-    targetUrl.searchParams.set('r', JSON.stringify(parsedNprofile.relays));
-
+    for (const relay of parsedNprofile.relays) {
+      if (relay.startsWith('wss://')) {
+        targetUrl.searchParams.append('w', relay.slice('wss://'.length));
+      } else {
+        targetUrl.searchParams.append('r', relay);
+      }
+    }
     const finalPrice = Number(price || '0');
     if (finalPrice > 0 && !Number.isNaN(finalPrice)) {
       targetUrl.searchParams.set('p', finalPrice.toString());
