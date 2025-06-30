@@ -1,3 +1,91 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Space Travel Animation - Stars rushing from center outward */
+@keyframes space-travel-1 {
+  0% {
+    transform: translateX(0) translateY(0) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(var(--travel-x)) translateY(var(--travel-y)) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes space-travel-2 {
+  0% {
+    transform: translateX(0) translateY(0) scale(0);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(var(--travel-x)) translateY(var(--travel-y)) scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes space-travel-3 {
+  0% {
+    transform: translateX(0) translateY(0) scale(0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(var(--travel-x)) translateY(var(--travel-y)) scale(0.8);
+    opacity: 0;
+  }
+}
+
+.space-travel-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.space-travel-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.9) 100%);
+  z-index: 1;
+}
+
+.traveling-star {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 3px #fff, 0 0 6px #fff;
+  z-index: 2;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  top: 50%;
+  left: 50%;
+}
+
+/* Ensure content stays above the animation layers */
+.space-content {
+  position: relative;
+  z-index: 10;
+}
