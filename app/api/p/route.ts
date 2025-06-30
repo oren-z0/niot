@@ -9,8 +9,11 @@ const priceUnits = new Map<string, string>([
 ]);
 
 function getBaseUrl(request: NextRequest) {
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
+  if (process.env.CUSTOM_DOMAIN) {
+    return `https://${process.env.CUSTOM_DOMAIN}`;
+  }
+  if (process.env.NODE_ENV === 'production' && process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
   }
   const protocol = request.headers.get('x-forwarded-proto') || request.nextUrl.protocol;
   const host = request.headers.get('host') || request.headers.get('x-forwarded-host') || request.nextUrl.host;
