@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-const starsCount = 40;
-const animationDuration = 8;
+const starsCount = 80;
+const animationDuration = 7;
 
 export default function SpaceStars() {
   const [mounted, setMounted] = useState(false);
