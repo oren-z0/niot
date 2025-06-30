@@ -21,14 +21,14 @@ const PayToZap = () => {
   const [nprofileError, setNprofileError] = useState("");
   const [price, setPrice] = useState("");
   const [unit, setUnit] = useState("sats");
-  const [zapMessage, setZapMessage] = useState("");
+  const [zapId, setZapId] = useState("");
   const [copied, setCopied] = useState(false);
 
   const lnurlp = useMemo(() => {
     if (!parsedNprofile) {
       return undefined;
     }
-    const targetUrl = new URL('https://niot.space/api/p');
+    const targetUrl = new URL(`${window.location.protocol}//${window.location.host}/api/p`);
     targetUrl.searchParams.set('pk', hexToBase64(parsedNprofile.pubkey));
     for (const relay of parsedNprofile.relays) {
       if (relay.startsWith('wss://')) {
@@ -44,12 +44,13 @@ const PayToZap = () => {
         targetUrl.searchParams.set('u', unit);
       }
     }
-    if (zapMessage) {
-      targetUrl.searchParams.set('m', zapMessage);
+    if (zapId) {
+      targetUrl.searchParams.set('i', zapId);
     }
+    console.info(`parsed lnurl: ${targetUrl.toString()}`);
     const words = bech32.toWords(new TextEncoder().encode(targetUrl.toString()));
     return bech32.encode('lnurl', words, Number.MAX_SAFE_INTEGER).toUpperCase();
-  }, [parsedNprofile, price, unit, zapMessage]);
+  }, [parsedNprofile, price, unit, zapId]);
 
   useEffect(() => {
     if (copied) {
@@ -183,22 +184,22 @@ const PayToZap = () => {
             </div>
           </div>
           <div>
-            <label htmlFor="zapMessage" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Zap Message (optional)
+            <label htmlFor="zapId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Zap ID (optional)
             </label>
             <input
               type="text"
-              id="zapMessage"
-              name="zapMessage"
+              id="zapId"
+              name="zapId"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
               placeholder="Digits only..."
-              value={zapMessage}
+              value={zapId}
               onChange={(e) => {
                 const value = e.target.value.trim();
                 if (value.length > 25 || !/^[0-9]*$/.test(value)) {
                   return;
                 }
-                setZapMessage(value);
+                setZapId(value);
               }}
             />
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
