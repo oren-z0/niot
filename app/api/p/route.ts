@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     const priceString = searchParams.get('p');
     let priceUnit: string | undefined;
     if (priceString) {
-      if (priceString.length > 20 || !/^\d+(\.\d{1,2})$/.test(priceString)) {
+      if (priceString.length > 20 || !/^\d+(\.\d{1,2})?$/.test(priceString)) {
         return NextResponse.json({ error: 'Invalid price' }, { status: 400 });
       }
       priceUnit = searchParams.get('u') || undefined;
