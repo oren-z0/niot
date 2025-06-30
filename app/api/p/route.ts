@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
       .sign(new TextEncoder().encode(process.env.JWT_SECRET));
 
     return NextResponse.json({
-      ...eventContent,
+      ...lnurlpBody,
       ...(priceMillisats !== undefined && {
         minSendable: priceMillisats,
         maxSendable: priceMillisats,
