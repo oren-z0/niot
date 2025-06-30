@@ -72,8 +72,8 @@
 
 .traveling-star {
   position: absolute;
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
   background: #fff;
   border-radius: 50%;
   box-shadow: 0 0 3px #fff, 0 0 6px #fff;
