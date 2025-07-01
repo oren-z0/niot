@@ -21,7 +21,7 @@ const PayToZap = () => {
   const [nprofileError, setNprofileError] = useState("");
   const [price, setPrice] = useState("");
   const [unit, setUnit] = useState("sats");
-  const [zapId, setZapId] = useState("");
+  const [triggerId, setTriggerId] = useState("");
   const [copied, setCopied] = useState(false);
 
   const lnurlp = useMemo(() => {
@@ -44,13 +44,13 @@ const PayToZap = () => {
         targetUrl.searchParams.set('u', unit);
       }
     }
-    if (zapId) {
-      targetUrl.searchParams.set('i', zapId);
+    if (triggerId) {
+      targetUrl.searchParams.set('i', triggerId);
     }
     console.info(`parsed lnurl: ${targetUrl.toString()}`);
     const words = bech32.toWords(new TextEncoder().encode(targetUrl.toString()));
     return bech32.encode('lnurl', words, Number.MAX_SAFE_INTEGER).toUpperCase();
-  }, [parsedNprofile, price, unit, zapId]);
+  }, [parsedNprofile, price, unit, triggerId]);
 
   useEffect(() => {
     if (copied) {
@@ -184,26 +184,26 @@ const PayToZap = () => {
             </div>
           </div>
           <div>
-            <label htmlFor="zapId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Zap ID (optional)
+            <label htmlFor="triggerId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Trigger ID (optional)
             </label>
             <input
               type="text"
-              id="zapId"
-              name="zapId"
+              id="triggerId"
+              name="triggerId"
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
               placeholder="Digits only..."
-              value={zapId}
+              value={triggerId}
               onChange={(e) => {
                 const value = e.target.value.trim();
                 if (value.length > 25 || !/^[0-9]*$/.test(value)) {
                   return;
                 }
-                setZapId(value);
+                setTriggerId(value);
               }}
             />
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Will be added to each zap event to allow separation between IoT triggers, up to 25 characters.
+              Will be added to each zap event content to allow separation between IoT triggers, up to 25 characters.
             </p>
           </div>
           {

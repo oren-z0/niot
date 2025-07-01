@@ -42,8 +42,8 @@ export async function GET(request: NextRequest) {
     if (relays.length === 0) {
       return NextResponse.json({ error: 'No relays provided' }, { status: 400 });
     }
-    const zapId = searchParams.get('i') || undefined;
-    if (zapId && (zapId.length > 25 || !/^\d*$/.test(zapId))) {
+    const triggerId = searchParams.get('i') || undefined;
+    if (triggerId && (triggerId.length > 25 || !/^\d*$/.test(triggerId))) {
       return NextResponse.json({ error: 'Invalid zap message' }, { status: 400 });
     }
     let priceMillisats: number | undefined;
@@ -115,24 +115,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'price is out of range of wallet support' }, { status: 400 });
     }
     const jwt = await new jose.SignJWT({
-      aud: 'c', // the /api/c endpoint.
-      c: callback,
+      aud: 'lnurlp-callback', // the /api/c endpoint.
+      callback,
       ...(priceMillisats !== undefined && {
-        ms: priceMillisats, // will verify that the same amount is sent to /api/c
+        msats: priceMillisats, // will verify that the same amount is sent to /api/c
         // priceUnit and priceString will be sent in the content of the zap-request event, so the device could verify.
-        // Malicious users can generate an LNURLP that uses the same zapId, but different price - then pay them
+        // Malicious users can generate an LNURLP that uses the same triggerId, but different price - then pay them
         // instead of the original LNURLP.
         ...(priceString && priceUnit && {
-          p: priceString, // keep as string even though it's a number
-          u: priceUnit,
+          price: priceString, // keep as string even though it's a number
+          unit: priceUnit,
         }),
       }),
-      ...(zapId && {
-        i: zapId,
+      ...(triggerId && {
+        triggerId,
       }),
-      l: lnurlpUrl,
-      r: relays,
-      pk: publicKeyHex,
+      lnurl: lnurlpUrl,
+      relays,
+      pubkey: publicKeyHex,
     }).setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
       .setExpirationTime('30m')
