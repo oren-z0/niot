@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = request.nextUrl;
     const publicKeyBase64 = searchParams.get('pk');
     if (!publicKeyBase64 || typeof publicKeyBase64 !== 'string') {
-      return NextResponse.json({ error: 'Invalid public key' }, { status: 400 });
+      return NextResponse.json({ status: 'ERROR', reason: 'Invalid public key' }, { status: 400 });
     }
     let publicKeyHex: string;
     try {
@@ -34,31 +34,31 @@ export async function GET(request: NextRequest) {
       const publicKeyBytes = atob(publicKeyBase64Fixed);
       publicKeyHex = Array.from(publicKeyBytes, byte => byte.charCodeAt(0).toString(16).padStart(2, '0')).join('');
     } catch (error) {
-      return NextResponse.json({ error: 'Invalid pk' }, { status: 400 });
+      return NextResponse.json({ status: 'ERROR', reason: 'Invalid pk' }, { status: 400 });
     }
     const relays = [
       ...searchParams.getAll('w').map((v) => `wss://${v}`),
       ...searchParams.getAll('r'),
     ];
     if (relays.length === 0) {
-      return NextResponse.json({ error: 'No relays provided' }, { status: 400 });
+      return NextResponse.json({ status: 'ERROR', reason: 'No relays provided' }, { status: 400 });
     }
     const triggerId = searchParams.get('i') || undefined;
     if (triggerId && (triggerId.length > 25 || !/^\d*$/.test(triggerId))) {
-      return NextResponse.json({ error: 'Invalid zap message' }, { status: 400 });
+      return NextResponse.json({ status: 'ERROR', reason: 'Invalid zap message' }, { status: 400 });
     }
     let priceMillisats: number | undefined;
     const priceString = searchParams.get('p');
     let priceUnit: string | undefined;
     if (priceString) {
       if (priceString.length > 20 || !/^\d+(\.\d{1,2})?$/.test(priceString)) {
-        return NextResponse.json({ error: 'Invalid price' }, { status: 400 });
+        return NextResponse.json({ status: 'ERROR', reason: 'Invalid price' }, { status: 400 });
       }
       priceUnit = searchParams.get('u') || undefined;
       if (priceUnit) {
         const priceInstrument = priceUnits.get(priceUnit);
         if (!priceInstrument) {
-          return NextResponse.json({ error: 'Invalid price unit' }, { status: 400 });
+          return NextResponse.json({ status: 'ERROR', reason: 'Invalid price unit' }, { status: 400 });
         }
         const btcPriceResponse = await fetch(`https://data-api.coindesk.com/spot/v1/latest/tick?market=coinbase&instruments=${priceInstrument}&apply_mapping=false`);
         if (!btcPriceResponse.ok) {
@@ -85,35 +85,38 @@ export async function GET(request: NextRequest) {
       }
     );
     if (!event) {
-      return NextResponse.json({ error: 'Failed to find nostr profile' }, { status: 400 });
+      return NextResponse.json({ status: 'ERROR', reason: 'Failed to find nostr profile' }, { status: 400 });
     }
     console.info("parsing nostr profile content");
     const eventContent = JSON.parse(event.content);
     const { lud16 } = eventContent; // TODO: support lud06?
     if (!lud16) {
-      return NextResponse.json({ error: 'No lud16 found in nostr profile' }, { status: 400 });
+      return NextResponse.json({ status: 'ERROR', reason: 'No lud16 found in nostr profile' }, { status: 400 });
     }
     const [username, domain] = lud16.split('@');
     const lnurlpUrl = `https://${domain}/.well-known/lnurlp/${username}`;
     console.info(`lnurlpUrl: ${lnurlpUrl}`);
     const lnurlpResponse = await fetch(lnurlpUrl);
     if (!lnurlpResponse.ok) {
-      return NextResponse.json({ error: 'Failed to call lnurlp endpoint' }, { status: 400 });
+      return NextResponse.json({ status: 'ERROR', reason: 'Failed to call lnurlp endpoint' }, { status: 400 });
     }
     const lnurlpBody = await lnurlpResponse.json();
     console.info(`lnurlp response: ${JSON.stringify(lnurlpBody)}`);
-    const { tag, allowsNostr, minSendable, maxSendable, callback } = lnurlpBody;
+    const { tag, allowsNostr, minSendable, maxSendable, callback, commentAllowed, ...rest } = lnurlpBody;
     if (tag !== 'payRequest') {
-      return NextResponse.json({ error: "nostr profile's lightning-wallet responded with unexpected tag" }, { status: 400 });
+      return NextResponse.json({ status: 'ERROR', reason: "nostr profile's lightning-wallet responded with unexpected tag" }, { status: 400 });
     }
     if (!allowsNostr) {
-      return NextResponse.json({ error: 'nostr profile has a lightning-wallet that does not support zaps' }, { status: 400 });
+      return NextResponse.json({ status: 'ERROR', reason: 'nostr profile has a lightning-wallet that does not support zaps' }, { status: 400 });
     }
     if (!Number.isSafeInteger(minSendable) || !Number.isSafeInteger(maxSendable)) {
-      return NextResponse.json({ error: 'nostr profile has a wallet with invalid min/max sendable' }, { status: 400 });
+      return NextResponse.json({ status: 'ERROR', reason: 'nostr profile has a wallet with invalid min/max sendable' }, { status: 400 });
     }
     if ((priceMillisats !== undefined) && (priceMillisats < minSendable || priceMillisats > maxSendable)) {
-      return NextResponse.json({ error: 'price is out of range of wallet support' }, { status: 400 });
+      return NextResponse.json({ status: 'ERROR', reason: 'price is out of range of wallet support' }, { status: 400 });
+    }
+    if (!commentAllowed || typeof commentAllowed !== 'number' || commentAllowed < 50) {
+      return NextResponse.json({ status: 'ERROR', reason: 'nostr profile has a wallet that does not support comments if niot required length' }, { status: 400 });
     }
     const jwt = await new jose.SignJWT({
       aud: 'lnurlp-callback', // the /api/c endpoint.
@@ -140,7 +143,12 @@ export async function GET(request: NextRequest) {
       .sign(new TextEncoder().encode(process.env.JWT_SECRET));
 
     return NextResponse.json({
-      ...lnurlpBody,
+      tag,
+      allowsNostr,
+      minSendable,
+      maxSendable,
+      // removed commentAllowed,
+      ...rest,
       ...(priceMillisats !== undefined && {
         minSendable: priceMillisats,
         maxSendable: priceMillisats,
@@ -149,6 +157,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error in GET request:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ status: 'ERROR', reason: 'Internal server error' }, { status: 500 });
   }
 }
