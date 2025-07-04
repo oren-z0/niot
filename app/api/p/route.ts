@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
         minSendable: priceMillisats,
         maxSendable: priceMillisats,
       }),
-      callback: `${getBaseUrl(request)}/c/${jwt}`,
+      callback: `${getBaseUrl(request)}/api/c/${jwt}`,
     });
   } catch (error) {
     console.error('Error in GET request:', error);
