@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" href="/favicon.ico" type="image/x-icon" />
         <meta property="og:title" content="nIoT.space" />
         <meta property="og:description" content="Tools for connecting IoT to Nostr." />
-        <meta property="og:image" content="https://niot.space/images/banner_white.png" />
+        <meta property="og:image" content="https://niot.space/images/avatar.png" />
         <meta property="og:url" content="https://niot.space" />
         <meta property="og:type" content="website" />
       </head>
