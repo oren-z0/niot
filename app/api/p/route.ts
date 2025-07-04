@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SimplePool } from 'nostr-tools';
 import * as jose from 'jose';
+import { bech32 } from 'bech32';
 
 const btcToMillisats = 10 ** 11;
 
@@ -130,7 +131,7 @@ export async function GET(request: NextRequest) {
       ...(triggerId && {
         triggerId,
       }),
-      lnurl: lnurlpUrl,
+      lnurl: bech32.encode('lnurl', bech32.toWords(new TextEncoder().encode(lnurlpUrl)), Number.MAX_SAFE_INTEGER),
       relays,
       pubkey: publicKeyHex,
     }).setProtectedHeader({ alg: 'HS256' })
