@@ -102,11 +102,11 @@ export async function GET(request: NextRequest) {
     }
     const lnurlpBody = await lnurlpResponse.json();
     console.info(`lnurlp response: ${JSON.stringify(lnurlpBody)}`);
-    const { tag, allowsNostr, minSendable, maxSendable, callback, commentAllowed, ...rest } = lnurlpBody;
+    const { tag, allowsNostr, nostrPubkey, minSendable, maxSendable, callback, commentAllowed, ...rest } = lnurlpBody;
     if (tag !== 'payRequest') {
       return NextResponse.json({ status: 'ERROR', reason: "nostr profile's lightning-wallet responded with unexpected tag" }, { status: 400 });
     }
-    if (!allowsNostr) {
+    if (!allowsNostr || !nostrPubkey || nostrPubkey.length !== 64 || !/^[0-9a-fA-F]+$/.test(nostrPubkey)) {
       return NextResponse.json({ status: 'ERROR', reason: 'nostr profile has a lightning-wallet that does not support zaps' }, { status: 400 });
     }
     if (!Number.isSafeInteger(minSendable) || !Number.isSafeInteger(maxSendable)) {
@@ -144,7 +144,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       tag,
-      allowsNostr,
+      // removed allowNostr, nostrPubkey.
       minSendable,
       maxSendable,
       // removed commentAllowed,
