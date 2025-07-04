@@ -3,7 +3,7 @@ import { SimplePool } from 'nostr-tools';
 import * as jose from 'jose';
 import { bech32 } from 'bech32';
 
-const btcToMillisats = 10 ** 11;
+const btcToSats = 100_000_000;
 
 const priceUnits = new Map<string, string>([
   ['USD', 'BTC-USD'],
@@ -70,7 +70,8 @@ export async function GET(request: NextRequest) {
           console.error("Failed to parse Bitcoin price");
           throw new Error("Failed to parse Bitcoin price");
         }
-        priceMillisats = Math.round(Number(priceString) * (btcToMillisats / btcPriceData.Data[priceInstrument].PRICE));
+        // Rounds millisats - not all wallets support it.
+        priceMillisats = Math.max(1, Math.ceil(Number(priceString) * (btcToSats / btcPriceData.Data[priceInstrument].PRICE))) * 1000;
       } else { // unit is sats
         priceMillisats = Math.round(Number(priceString) * 1000);
       }

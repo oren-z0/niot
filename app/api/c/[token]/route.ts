@@ -37,15 +37,15 @@ export async function GET(
 
     // Validate token exists
     if (!token) {
-      return new Response('Token is required', { status: 400 });
+      return NextResponse.json({ status: 'ERROR', reason: 'Token is required' }, { status: 400 });
     }
 
     if (!amountString) {
-      return new Response('Amount query-parameter is required', { status: 400 });
+      return NextResponse.json({ status: 'ERROR', reason: 'Amount query-parameter is required' }, { status: 400 });
     }
     const amount = Number.parseInt(amountString);
     if (amount <= 0 || !Number.isSafeInteger(amount)) {
-      return new Response('Amount must be a valid positive integer', { status: 400 });
+      return NextResponse.json({ status: 'ERROR', reason: 'Amount must be a valid positive integer' }, { status: 400 });
     }
 
     let parsedToken: ParsedToken;
@@ -57,12 +57,16 @@ export async function GET(
       parsedToken = payload as ParsedToken;
     } catch (error) {
       console.error('Error verifying token:', error);
-      return new Response('Invalid or expired token', { status: 400 });
+      return NextResponse.json({ status: 'ERROR', reason: 'Invalid or expired token' }, { status: 400 });
     }
 
     if (parsedToken.msats !== undefined && parsedToken.msats !== amount) {
-      console.warn(`Amount does not match the token: ${JSON.stringify(parsedToken.msats)} !== ${JSON.stringify(amount)}`);
-      return new Response('Amount does not match the token', { status: 400 });
+      if (amount % 1000 === 0 && [Math.ceil(parsedToken.msats / 1000) * 1000, Math.floor(parsedToken.msats / 1000) * 1000].includes(amount)) {
+        return NextResponse.json({ status: 'ERROR', reason: 'Your wallet does not support millisats' }, { status: 400 });
+      } else {
+        console.warn(`Amount does not match the token: ${parsedToken.msats} !== ${amount}`);
+        return NextResponse.json({ status: 'ERROR', reason: 'Amount does not match the token' }, { status: 400 });
+      }
     }
 
     if (!privateKeyBytes) {
