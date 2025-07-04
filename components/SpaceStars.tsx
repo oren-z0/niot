@@ -36,7 +36,7 @@ export default function SpaceStars() {
             className={isContainer ? "traveling-container" : "traveling-star"}
             style={{
               animationDuration: `${animationDuration * (0.5 + Math.random() * 1)}s`,
-              animationDelay: `${Math.random() * 10 - 5}s`,
+              animationDelay: `${Math.random() * 15}s`,
               animationName: `space-travel-${Math.floor(Math.random() * 3) + 1}`,
               "--travel-x": `${travel * 100 * cosAngle / window.innerWidth}vw`,
               "--travel-y": `${travel * 100 * sinAngle / window.innerHeight}vh`,
