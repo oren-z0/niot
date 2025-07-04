@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { nip19 } from "nostr-tools";
 import { bech32 } from "bech32";
 import { QRCodeSVG } from "qrcode.react";
+import Link from "next/link";
 
 const maxSafePrice = 2 ** 43;
 
@@ -121,12 +123,31 @@ const PayToZap = () => {
   return (
     <section className="container mx-auto px-4 py-12 bg-gray-100 dark:bg-gray-900 duration-200 rounded-xl opacity-90">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
+        <div className="text-center flex flex-col">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-gray-900 dark:text-white mb-4">
             Every Payment Becomes a <span className="italic">Zap</span>
           </h2>
           <p className="mt-8 text-xl text-gray-600 dark:text-gray-300 font-light">
             Create LNURL-Pay links that create <span className="italic">Zap</span> events when paid.
+          </p>
+          <p className="text-xl text-gray-600 dark:text-gray-300 font-light">
+            Zaps will come from the following profile:
+          </p>
+          <div className="flex justify-center items-center mt-4">
+            <Link href="https://njump.me/nprofile1qqsvzfvhvgrdpvlw0kywdcwtzm9dptwfge5fpv2njrc23ugm6fynjkqpzpmhxue69uhkummnw3ezumt0d5hszrnhwden5te0dehhxtnvdakz7qgawaehxw309ahx7um5wghxy6t5vdhkjmn9wgh8xmmrd9skctcv3dg7c" target="_blank" rel="noopener noreferrer">
+              <Image
+                width={128}
+                height={128}
+                src="/images/avatar.png"
+                alt="Profile Avatar"
+                className="rounded-full object-cover border-2 border-gray-300 dark:border-gray-600"
+              />
+            </Link>
+          </div>
+          <p className="text-l text-gray-600 dark:text-gray-300 font-light mt-4 font-mono break-all">
+            <Link href="https://njump.me/nprofile1qqsvzfvhvgrdpvlw0kywdcwtzm9dptwfge5fpv2njrc23ugm6fynjkqpzpmhxue69uhkummnw3ezumt0d5hszrnhwden5te0dehhxtnvdakz7qgawaehxw309ahx7um5wghxy6t5vdhkjmn9wgh8xmmrd9skctcv3dg7c" target="_blank" rel="noopener noreferrer">
+              npub1cyjewcsx6ze7ulvgumsuk9k26zkuj3ngjzc48y8s4rc3h5jf89vq33zhpt
+            </Link>
           </p>
         </div>
         <div className="mt-10">
