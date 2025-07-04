@@ -61,6 +61,7 @@ export async function GET(
     }
 
     if (parsedToken.msats !== undefined && parsedToken.msats !== amount) {
+      console.warn(`Amount does not match the token: ${JSON.stringify(parsedToken.msats)} !== ${JSON.stringify(amount)}`);
       return new Response('Amount does not match the token', { status: 400 });
     }
 
