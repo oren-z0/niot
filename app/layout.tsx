@@ -13,12 +13,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap"
-          rel="stylesheet"
-        />
+        <meta property="og:title" content="nIoT.space" />
+        <meta property="og:description" content="Tools for connecting IoT to Nostr." />
+        <meta property="og:image" content="https://niot.space/images/banner_white.png" />
+        <meta property="og:url" content="https://niot.space" />
+        <meta property="og:type" content="website" />
       </head>
       <body className="bg-white dark:bg-black min-h-screen">
         <ThemeProvider
