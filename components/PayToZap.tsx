@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { nip19 } from "nostr-tools";
 import { bech32 } from "bech32";
-import { QRCodeSVG } from "qrcode.react";
+import { QRCodeCanvas } from "qrcode.react";
 import Link from "next/link";
 
 const maxSafePrice = 2 ** 43;
@@ -254,7 +254,7 @@ const PayToZap = () => {
                   </button>
                 </div>
                 <div className="mt-8 mb-4 flex justify-center">
-                  <QRCodeSVG value={lnurlp} marginSize={4} size={256} />
+                  <QRCodeCanvas value={lnurlp} marginSize={4} size={256} />
                 </div>
               </div>
             )
