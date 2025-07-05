@@ -9,6 +9,9 @@ import Link from "next/link";
 
 const maxSafePrice = 2 ** 43;
 
+const niotNpub = "npub1cyjewcsx6ze7ulvgumsuk9k26zkuj3ngjzc48y8s4rc3h5jf89vq33zhpt";
+const niotProfilePage = "https://njump.me/nprofile1qqsvzfvhvgrdpvlw0kywdcwtzm9dptwfge5fpv2njrc23ugm6fynjkqpzpmhxue69uhkummnw3ezumt0d5hszrnhwden5te0dehhxtnvdakz7qgawaehxw309ahx7um5wghxy6t5vdhkjmn9wgh8xmmrd9skctcv3dg7c";
+
 function hexToBase64(hex: string) {
   const pubkeyBytes = new Uint8Array(hex.match(/.{1,2}/g)?.map(byte => parseInt(byte, 16)) || []);
   return btoa(String.fromCharCode(...pubkeyBytes))
@@ -24,7 +27,8 @@ const PayToZap = () => {
   const [price, setPrice] = useState("");
   const [unit, setUnit] = useState("sats");
   const [triggerId, setTriggerId] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [copiedLnurl, setCopiedLnurl] = useState(false);
+  const [copiedNiotNpub, setCopiedNiotNpub] = useState(false);
 
   const lnurlp = useMemo(() => {
     if (!parsedNprofile) {
@@ -55,17 +59,24 @@ const PayToZap = () => {
   }, [parsedNprofile, price, unit, triggerId]);
 
   useEffect(() => {
-    if (copied) {
-      const timeout = setTimeout(() => setCopied(false), 2000);
+    if (copiedLnurl) {
+      const timeout = setTimeout(() => setCopiedLnurl(false), 2000);
       return () => clearTimeout(timeout);
     }
-  }, [copied]);
+  }, [copiedLnurl]);
+
+  useEffect(() => {
+    if (copiedNiotNpub) {
+      const timeout = setTimeout(() => setCopiedNiotNpub(false), 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [copiedNiotNpub]);
 
   function updateNprofile(e: React.ChangeEvent<HTMLInputElement>) {
     setNprofile(e.target.value);
     const value = e.target.value.toLowerCase().trim();
     if (value.length === 0) {
-      setNprofileError("Nprofile is required");
+      setNprofileError("nprofile is required");
       setParsedNprofile(undefined);
       return;
     }
@@ -134,7 +145,7 @@ const PayToZap = () => {
             Zaps will come from the following profile:
           </p>
           <div className="flex justify-center items-center mt-4">
-            <Link href="https://njump.me/nprofile1qqsvzfvhvgrdpvlw0kywdcwtzm9dptwfge5fpv2njrc23ugm6fynjkqpzpmhxue69uhkummnw3ezumt0d5hszrnhwden5te0dehhxtnvdakz7qgawaehxw309ahx7um5wghxy6t5vdhkjmn9wgh8xmmrd9skctcv3dg7c" target="_blank" rel="noopener noreferrer">
+            <Link href={niotProfilePage} target="_blank" rel="noopener noreferrer">
               <Image
                 width={128}
                 height={128}
@@ -144,11 +155,26 @@ const PayToZap = () => {
               />
             </Link>
           </div>
-          <p className="text-l text-gray-600 dark:text-gray-300 font-light mt-4 font-mono break-all">
-            <Link href="https://njump.me/nprofile1qqsvzfvhvgrdpvlw0kywdcwtzm9dptwfge5fpv2njrc23ugm6fynjkqpzpmhxue69uhkummnw3ezumt0d5hszrnhwden5te0dehhxtnvdakz7qgawaehxw309ahx7um5wghxy6t5vdhkjmn9wgh8xmmrd9skctcv3dg7c" target="_blank" rel="noopener noreferrer">
-              npub1cyjewcsx6ze7ulvgumsuk9k26zkuj3ngjzc48y8s4rc3h5jf89vq33zhpt
-            </Link>
-          </p>
+          <div className="flex flex-row justify-center items-center mt-4">
+            <p className="text-sm text-gray-600 dark:text-gray-300 font-light font-mono break-all text-left">
+              {niotNpub}
+            </p>
+            <button
+              type="button"
+              disabled={copiedNiotNpub}
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(niotNpub);
+                  setCopiedNiotNpub(true);
+                } catch (err) {
+                  console.error('Failed to copy text: ', err);
+                }
+              }}
+              className="ml-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[80px]"
+            >
+              {copiedNiotNpub ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
         </div>
         <div className="mt-10">
         <form className="max-w-2xl mx-auto space-y-6">
@@ -239,18 +265,18 @@ const PayToZap = () => {
                   </div>
                   <button
                     type="button"
-                    disabled={copied}
+                    disabled={copiedLnurl}
                     onClick={async () => {
                       try {
                         await navigator.clipboard.writeText(lnurlp);
-                        setCopied(true);
+                        setCopiedLnurl(true);
                       } catch (err) {
                         console.error('Failed to copy text: ', err);
                       }
                     }}
                     className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[80px]"
                   >
-                    {copied ? 'Copied!' : 'Copy'}
+                    {copiedLnurl ? 'Copied!' : 'Copy'}
                   </button>
                 </div>
                 <div className="mt-8 mb-4 flex justify-center">
