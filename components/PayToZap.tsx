@@ -142,7 +142,7 @@ const PayToZap = () => {
             Create LNURL-Pay links that create <span className="italic">Zap</span> events when paid.
           </p>
           <p className="text-xl text-gray-600 dark:text-gray-300 font-light">
-            Zaps will come from the following profile:
+            The following profile will appear as the sender of the zaps:
           </p>
           <div className="flex justify-center items-center mt-4">
             <Link href={niotProfilePage} target="_blank" rel="noopener noreferrer">
