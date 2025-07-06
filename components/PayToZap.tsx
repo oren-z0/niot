@@ -20,6 +20,10 @@ function hexToBase64(hex: string) {
     .replace(/=/g, '');
 }
 
+function getPrice(s: string) {
+  return Math.min(maxSafePrice, Math.max(0, Number(Number(s).toFixed(2)) || 0));
+}
+
 const PayToZap = () => {
   const [nprofile, setNprofile] = useState("");
   const [parsedNprofile, setParsedNprofile] = useState<{ pubkey: string, relays: string[] } | undefined>(undefined);
@@ -43,8 +47,8 @@ const PayToZap = () => {
         targetUrl.searchParams.append('r', relay);
       }
     }
-    const finalPrice = Number(price || '0');
-    if (finalPrice > 0 && !Number.isNaN(finalPrice)) {
+    const finalPrice = getPrice(price);
+    if (finalPrice > 0) {
       targetUrl.searchParams.set('p', finalPrice.toString());
       if (unit !== 'sats') {
         targetUrl.searchParams.set('u', unit);
@@ -111,24 +115,15 @@ const PayToZap = () => {
       setPrice("");
       return;
     }
-    const newPrice = Math.max(0, Number(Number(value).toFixed(2)) || 0);
-    if (newPrice <= 0) {
-      if (isBlur) {
-        setPrice("");
-      } else {
-        setPrice(value);
-      }
+    if (!/^[0-9]*\.?[0-9]*$/.test(value)) {
       return;
     }
-    if (newPrice > maxSafePrice) {
-      if (isBlur) {
-        setPrice("");
-      } else {
-        setPrice(maxSafePrice.toString());
-      }
+    const newPrice = getPrice(value);
+    if (isBlur) {
+      setPrice(newPrice === 0 ? '' : newPrice.toString());
       return;
     }
-    setPrice(newPrice.toString());
+    setPrice(newPrice < maxSafePrice ? value : maxSafePrice.toString());
   }
 
   return (
