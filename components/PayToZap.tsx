@@ -33,9 +33,10 @@ const PayToZap = () => {
   const [triggerId, setTriggerId] = useState("");
   const [copiedLnurl, setCopiedLnurl] = useState(false);
   const [copiedNiotNpub, setCopiedNiotNpub] = useState(false);
+  const [newRelay, setNewRelay] = useState("");
 
   const lnurlp = useMemo(() => {
-    if (!parsedNprofile) {
+    if (!parsedNprofile || parsedNprofile.relays.length === 0) {
       return undefined;
     }
     const targetUrl = new URL(`${window.location.protocol}//${window.location.host}/api/p`);
@@ -76,35 +77,32 @@ const PayToZap = () => {
     }
   }, [copiedNiotNpub]);
 
-  function updateNprofile(e: React.ChangeEvent<HTMLInputElement>) {
-    setNprofile(e.target.value);
-    const value = e.target.value.toLowerCase().trim();
+  function handleNewNprofile(value: string) {
     if (value.length === 0) {
       setNprofileError("nprofile is required");
       setParsedNprofile(undefined);
       return;
     }
-    if (value.startsWith("npub")) {
-      setNprofileError("We need the nprofile (that contains both your public-key and relay hints), not the npub.");
-      setParsedNprofile(undefined);
-      return;
-    }
-    if ("nprofile".startsWith(value)) {
+    if ("nprofile".startsWith(value) || "npub".startsWith(value)) {
       setNprofileError("");
       setParsedNprofile(undefined);
       return;
     }
     try {
       const decoded = nip19.decode(value);
-      if (decoded.type !== "nprofile") {
-        setNprofileError("Invalid nprofile");
+      if (decoded.type === "nprofile") {
+        setParsedNprofile({ pubkey: decoded.data.pubkey, relays: decoded.data.relays });
+        setNprofileError("");
+      } else if (decoded.type === "npub") {
+        setParsedNprofile({ pubkey: decoded.data, relays: [] });
+        setNprofileError("");
+      } else {
+        setNprofileError("Invalid nprofile/npub");
         setParsedNprofile(undefined);
         return;
       }
-      setParsedNprofile({ pubkey: decoded.data.pubkey, relays: decoded.data.relays });
-      setNprofileError("");
     } catch (error) {
-      setNprofileError("Invalid nprofile");
+      setNprofileError("Invalid nprofile/npub");
       setParsedNprofile(undefined);
     }
   }
@@ -124,6 +122,20 @@ const PayToZap = () => {
       return;
     }
     setPrice(newPrice < maxSafePrice ? value : maxSafePrice.toString());
+  }
+
+  function addRelay() {
+    const newRelayTrimmed = newRelay.trim();
+    if (newRelayTrimmed.length === 0) {
+      return;
+    }
+    setParsedNprofile((oldParsedNprofile) => {
+      if (!oldParsedNprofile) {
+        return undefined;
+      }
+      return { pubkey: oldParsedNprofile.pubkey, relays: [...oldParsedNprofile.relays, newRelayTrimmed] };
+    });
+    setNewRelay("");
   }
 
   return (
@@ -171,116 +183,195 @@ const PayToZap = () => {
             </button>
           </div>
         </div>
-        <div className="mt-10">
-        <form className="max-w-2xl mx-auto space-y-6">
-          {/* nprofile field */}
-          <div>
-            <label htmlFor="nprofile" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Enter your nprofile:
-            </label>
-            <input
-              type="text"
-              id="nprofile"
-              name="nprofile"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-              placeholder="nprofile1..."
-              value={nprofile}
-              onChange={updateNprofile}
-              onBlur={(e) => {
-                if (e.target.value.trim().length === 0) {
-                  setNprofileError("Nprofile is required");
-                  setParsedNprofile(undefined);
-                }
-              }}
-            />
-            {nprofileError && <p className="text-red-500 dark:text-red-400 text-sm mt-1">{nprofileError}</p>}
-          </div>
-          <div>
-            <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Price (optional)
-            </label>
-            <div className="flex gap-2">
+        <div className="mt-8">
+          <form className="max-w-2xl mx-auto">
+            {/* nprofile field */}
+            <div>
+              <label htmlFor="nprofile" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Enter your nprofile:
+              </label>
               <input
-                type="number"
-                id="price"
-                name="price"
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-                placeholder=""
-                step={0.01}
-                min={0.01}
-                max={maxSafePrice}
-                value={price}
-                onChange={(e) => onPriceUpdate(e, false)}
-                onBlur={(e) => onPriceUpdate(e, true)}
+                type="text"
+                id="nprofile"
+                name="nprofile"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                placeholder="nprofile1..."
+                value={nprofile}
+                onChange={(e) => {
+                  setNprofile(e.target.value);
+                  handleNewNprofile(e.target.value.toLowerCase().trim());
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleNewNprofile(nprofile.toLowerCase().trim());
+                  }
+                }}
+                onBlur={(e) => {
+                  if (e.target.value.trim().length === 0) {
+                    setNprofileError("Nprofile is required");
+                    setParsedNprofile(undefined);
+                  }
+                }}
               />
-              <select
-                id="unit"
-                name="unit"
-                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-                value={unit}
-                onChange={(e) => setUnit(e.target.value)}
-              >
-                <option value="sats">sats</option>
-                <option value="USD">dirty USD</option>
-              </select>
             </div>
-          </div>
-          <div>
-            <label htmlFor="triggerId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Trigger ID (optional)
-            </label>
-            <input
-              type="text"
-              id="triggerId"
-              name="triggerId"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
-              placeholder="Digits only..."
-              value={triggerId}
-              onChange={(e) => {
-                const value = e.target.value.trim();
-                if (value.length > 25 || !/^[0-9]*$/.test(value)) {
-                  return;
-                }
-                setTriggerId(value);
-              }}
-            />
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Will be added to each zap event content to allow separation between IoT triggers, up to 25 characters.
-            </p>
-          </div>
-          {
-            lnurlp && (
-              <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-center">
-                  LNURL-Pay Endpoint
-                </label>
-                <div className="flex items-center gap-2">
-                  <div className="font-mono text-sm text-gray-800 dark:text-gray-200 break-all bg-white dark:bg-gray-800 p-3 rounded border border-gray-300 dark:border-gray-600 flex-1">
-                    {lnurlp}
+            {
+              parsedNprofile && (
+                <div className="mt-2 flex flex-col justify-center items-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 font-light font-mono break-all text-left">
+                    {nip19.npubEncode(parsedNprofile.pubkey)}
+                  </p>
+                  {
+                    parsedNprofile.relays.length > 0 && (
+                      <div className="flex flex-wrap justify-center items-center gap-1 mt-2">
+                        {parsedNprofile.relays.map((relay, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex items-center px-2 py-1 text-sm font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full"
+                          >
+                            {relay}
+                            <button
+                              type="button"
+                              className="ml-1 text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100"
+                              onClick={() => {
+                                const newRelays = parsedNprofile.relays.filter((_, i) => i !== index);
+                                setParsedNprofile({ pubkey: parsedNprofile.pubkey, relays: newRelays });
+                              }}
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )
+                  }
+                  <div className="mt-2 flex flex-row justify-center items-center gap-2 w-full px-2 sm:px-16">
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                      placeholder="wss://..."
+                      value={newRelay}
+                      onChange={(e) => setNewRelay(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          addRelay();
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[100px] disabled:opacity-50"
+                      onClick={addRelay}
+                      disabled={newRelay.trim().length === 0}
+                    >
+                      Add Relay
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    disabled={copiedLnurl}
-                    onClick={async () => {
-                      try {
-                        await navigator.clipboard.writeText(lnurlp);
-                        setCopiedLnurl(true);
-                      } catch (err) {
-                        console.error('Failed to copy text: ', err);
-                      }
-                    }}
-                    className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[80px]"
-                  >
-                    {copiedLnurl ? 'Copied!' : 'Copy'}
-                  </button>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Should typically begin with "wss://", i.e. "wss://relay.damus.io/", "wss://relay.primal.net/", "wss://nos.lol/".
+                  </p>
                 </div>
-                <div className="mt-8 mb-4 flex justify-center">
-                  <QRCodeCanvas value={lnurlp} marginSize={4} size={256} />
-                </div>
+              )
+            }
+            {
+              nprofileError && (
+                <p className="text-red-500 dark:text-red-400 text-sm mt-1">{nprofileError}</p>
+              )
+            }
+            {
+              !nprofileError && parsedNprofile && parsedNprofile.relays.length === 0 && (
+                <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                  Missing relays
+                </p>
+              )
+            }
+            <div className="mt-4">
+              <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Price (optional)
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  id="price"
+                  name="price"
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                  placeholder=""
+                  step={0.01}
+                  min={0.01}
+                  max={maxSafePrice}
+                  value={price}
+                  onChange={(e) => onPriceUpdate(e, false)}
+                  onBlur={(e) => onPriceUpdate(e, true)}
+                />
+                <select
+                  id="unit"
+                  name="unit"
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                  value={unit}
+                  onChange={(e) => setUnit(e.target.value)}
+                >
+                  <option value="sats">sats</option>
+                  <option value="USD">dirty USD</option>
+                </select>
               </div>
-            )
-          }
-        </form>
+            </div>
+            <div>
+              <label htmlFor="triggerId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 mt-4">
+                Trigger ID (optional)
+              </label>
+              <input
+                type="text"
+                id="triggerId"
+                name="triggerId"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+                placeholder="Digits only..."
+                value={triggerId}
+                onChange={(e) => {
+                  const value = e.target.value.trim();
+                  if (value.length > 25 || !/^[0-9]*$/.test(value)) {
+                    return;
+                  }
+                  setTriggerId(value);
+                }}
+              />
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Will be added to each zap event content to allow separation between IoT triggers, up to 25 characters.
+              </p>
+            </div>
+            {
+              lnurlp && (
+                <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-center">
+                    LNURL-Pay Endpoint
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <div className="font-mono text-sm text-gray-800 dark:text-gray-200 break-all bg-white dark:bg-gray-800 p-3 rounded border border-gray-300 dark:border-gray-600 flex-1">
+                      {lnurlp}
+                    </div>
+                    <button
+                      type="button"
+                      disabled={copiedLnurl}
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(lnurlp);
+                          setCopiedLnurl(true);
+                        } catch (err) {
+                          console.error('Failed to copy text: ', err);
+                        }
+                      }}
+                      className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[80px]"
+                    >
+                      {copiedLnurl ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                  <div className="mt-8 mb-4 flex justify-center">
+                    <QRCodeCanvas value={lnurlp} marginSize={4} size={256} />
+                  </div>
+                </div>
+              )
+            }
+          </form>
         </div>
       </div>
     </section>
