@@ -115,7 +115,7 @@ const PayToZap = () => {
       setPrice("");
       return;
     }
-    if (!/^[0-9]*\.?[0-9]*$/.test(value)) {
+    if (!/^\d*\.?\d{0,2}$/.test(value)) {
       return;
     }
     const newPrice = getPrice(value);
