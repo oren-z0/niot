@@ -82,9 +82,3 @@
   left: 50%;
   font-size: 2.5rem;
 }
-
-/* Ensure content stays above the animation layers */
-.space-content {
-  position: relative;
-  z-index: 10;
-}
