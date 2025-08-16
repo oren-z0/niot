@@ -139,7 +139,7 @@ const PayToZap = () => {
   }
 
   return (
-    <section className="container mx-auto px-4 py-12 bg-gray-100 dark:bg-gray-900 duration-200 rounded-xl opacity-90">
+    <section className="container mx-auto px-4 py-12 bg-gray-100 dark:bg-gray-900 duration-200 rounded-xl opacity-90" id="AutoZapper">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center flex flex-col">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-gray-900 dark:text-white mb-4">
@@ -185,7 +185,6 @@ const PayToZap = () => {
         </div>
         <div className="mt-8">
           <form className="max-w-2xl mx-auto">
-            {/* nprofile field */}
             <div>
               <label htmlFor="nprofile" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Enter your nprofile:
