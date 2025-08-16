@@ -24,7 +24,7 @@ function getPrice(s: string) {
   return Math.min(maxSafePrice, Math.max(0, Number(Number(s).toFixed(2)) || 0));
 }
 
-const PayToZap = () => {
+const AutoZapper = () => {
   const [nprofile, setNprofile] = useState("");
   const [parsedNprofile, setParsedNprofile] = useState<{ pubkey: string, relays: string[] } | undefined>(undefined);
   const [nprofileError, setNprofileError] = useState("");
@@ -377,4 +377,4 @@ const PayToZap = () => {
   );
 };
 
-export default PayToZap;
+export default AutoZapper;

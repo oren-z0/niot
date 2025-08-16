@@ -2,7 +2,7 @@
 
 import Header from "components/Header";
 import Hero from "components/Hero";
-import PayToZap from "components/PayToZap";
+import AutoZapper from "components/AutoZapper";
 import Footer from "components/Footer";
 import SpaceStars from "components/SpaceStars";
 import ZapWatcher from "components/ZapWatcher";
@@ -15,7 +15,7 @@ export default function Page() {
         <SpaceStars />
         <div className="relative z-10 flex flex-col gap-16 justify-around">
           <Hero />
-          <PayToZap />
+          <AutoZapper />
           <ZapWatcher />
         </div>
       </main>
