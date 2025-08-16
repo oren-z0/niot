@@ -7,6 +7,7 @@ import AutoZapper from "components/AutoZapper";
 import Footer from "components/Footer";
 import SpaceStars from "components/SpaceStars";
 import ZapWatcher from "components/ZapWatcher";
+import NoteGuardian from "components/NoteGuardian";
 
 export default function Page() {
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function Page() {
           <Hero />
           <AutoZapper />
           <ZapWatcher />
+          <NoteGuardian />
         </div>
       </main>
       <Footer />
