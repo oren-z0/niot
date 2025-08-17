@@ -13,9 +13,9 @@ const NoteGuardian = () => {
             NoteGuardian
           </h2>
           <p className="mt-8 text-xl text-gray-600 dark:text-gray-300 font-light">
-            A nostr browser extension that relays all the sign/encrypt/decrypt events to a second device, using WebRTC on local network.
+            A nostr browser extension that relays all the sign/encrypt/decrypt requests to a second device, using WebRTC on local network.
             <br />
-            Useful for working on your computer, but keeping your private-keys (nsec) only on your phone.
+            Useful for working on your computer while keeping your private-keys (nsec) only on your phone.
             <br />
             Works well with <Link
               href="https://play.google.com/store/apps/details?id=com.nostr.universe"
