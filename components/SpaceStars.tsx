@@ -20,7 +20,7 @@ export default function SpaceStars() {
     <div className="hidden dark:block">
     {
       Array.from({ length: starsCount }).map((_, index) => {
-        const isContainer = index % 8 === 0;
+        const isContainer = index % 7 === 0;
         const angle = 2 * Math.PI * Math.random();
         const cosAngle = Math.cos(angle);
         const sinAngle = Math.sin(angle);
@@ -46,7 +46,7 @@ export default function SpaceStars() {
               isContainer && (
                 <div className="brightness-75" style={{ transform: `rotate(${Math.round(-90 + Math.random() * 180)}deg)` }}>
                   {
-                    ["🛸", "🛰️", "🚀"][(index / 8) % 3]
+                    ["🛸", "🛰️", "🚀", "🪐"][(index / 7) % 4]
                   }
                 </div>
               )
