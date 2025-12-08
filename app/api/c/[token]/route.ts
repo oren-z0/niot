@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
-import { getPublicKey, nip57, nip19, finalizeEvent } from 'nostr-tools';
+import { nip57, nip19, finalizeEvent } from 'nostr-tools';
 import { hexToBytes } from '@noble/hashes/utils';
 
 interface ParsedToken {
