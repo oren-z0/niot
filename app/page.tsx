@@ -8,6 +8,7 @@ import Footer from "components/Footer";
 import SpaceStars from "components/SpaceStars";
 import ZapWatcher from "components/ZapWatcher";
 import NoteGuardian from "components/NoteGuardian";
+import BitcoinFlow from "components/BitcoinFlow";
 
 export default function Page() {
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function Page() {
           <AutoZapper />
           <ZapWatcher />
           <NoteGuardian />
+          <BitcoinFlow />
         </div>
       </main>
       <Footer />
