@@ -9,6 +9,7 @@ import SpaceStars from "components/SpaceStars";
 import ZapWatcher from "components/ZapWatcher";
 import NoteGuardian from "components/NoteGuardian";
 import BitcoinFlow from "components/BitcoinFlow";
+import BetWithFriends from "components/BetWithFriends";
 
 export default function Page() {
   useEffect(() => {
@@ -37,6 +38,7 @@ export default function Page() {
           <ZapWatcher />
           <NoteGuardian />
           <BitcoinFlow />
+          <BetWithFriends />
         </div>
       </main>
       <Footer />

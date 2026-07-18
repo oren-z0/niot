@@ -23,3 +23,6 @@ Thumbs.db
 # Build artifacts
 /build
 /dist
+
+# TypeScript incremental build cache
+*.tsbuildinfo
