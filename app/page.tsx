@@ -10,6 +10,7 @@ import ZapWatcher from "components/ZapWatcher";
 import NoteGuardian from "components/NoteGuardian";
 import BitcoinFlow from "components/BitcoinFlow";
 import BetWithFriends from "components/BetWithFriends";
+import ExfilTester from "components/ExfilTester";
 
 export default function Page() {
   useEffect(() => {
@@ -39,6 +40,7 @@ export default function Page() {
           <NoteGuardian />
           <BitcoinFlow />
           <BetWithFriends />
+          <ExfilTester />
         </div>
       </main>
       <Footer />
